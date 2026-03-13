@@ -449,7 +449,7 @@ function loadNew() {
   QUIZ_DATA = null;
   document.getElementById('resultCard').style.display = 'none';
   document.getElementById('uploadCard').style.display = 'block';
-  document.getElementById('headerTag').textContent = 'Quiz';
+  //document.getElementById('headerTag').textContent = 'Quiz';
   document.getElementById('headerTitle').textContent = 'Load a Quiz';
   document.getElementById('headerDesc').textContent = 'Upload a JSON file to get started';
   document.getElementById('fileInput').value = '';
@@ -471,7 +471,7 @@ function initQuiz() {
   userAnswers = [];
   locked = false;
 
-  document.getElementById('headerTag').textContent = QUIZ_DATA.name || 'Quiz';
+  //document.getElementById('headerTag').textContent = QUIZ_DATA.name || 'Quiz';
   document.getElementById('headerTitle').textContent = (QUIZ_DATA.name || 'Quiz') + ' Quiz';
   document.getElementById('headerDesc').textContent = QUIZ_DATA.description || '';
   document.getElementById('diffBadge').textContent = QUIZ_DATA.difficulty || '';
