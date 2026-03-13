@@ -490,7 +490,7 @@ function showQuestion() {
   document.getElementById('progressLabel').textContent = (qIndex + 1) + '/' + total;
   document.getElementById('progressFill').style.width = ((qIndex + 1) / total * 100) + '%';
   document.getElementById('questionText').textContent = q.question;
-  document.getElementById('clueText').textContent = q.clue || '';
+  //document.getElementById('clueText').textContent = q.clue || '';
   document.getElementById('feedbackArea').innerHTML = '';
 
   var options = shuffle([q.correctAnswer].concat(q.incorrectAnswers));
