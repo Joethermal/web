@@ -1,13 +1,618 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>QR Tracker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biology Quiz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap');
 
-  </head>
-  <body>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-<p>Hello Github</p>
-  </body>
+  :root {
+    --bg: #f0f4f9;
+    --surface: #ffffff;
+    --surface2: #f5f7fb;
+    --accent: #0a7c5c;
+    --accent2: #0369a1;
+    --danger: #dc2626;
+    --text: #111827;
+    --muted: #6b7280;
+    --border: rgba(0,0,0,0.08);
+    --radius: 16px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px 60px;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(10,124,92,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(3,105,161,0.05) 0%, transparent 50%);
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 580px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .header .tag {
+    display: inline-block;
+    background: rgba(10,124,92,0.08);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(10,124,92,0.18);
+  }
+
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 6vw, 40px);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  .header p {
+    color: var(--muted);
+    margin-top: 8px;
+    font-size: 15px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    animation: fadeUp 0.4s ease both;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  /* ── Progress ── */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .progress-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    min-width: 44px;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .difficulty-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(3,105,161,0.08);
+    color: var(--accent2);
+    border: 1px solid rgba(3,105,161,0.18);
+    white-space: nowrap;
+  }
+
+  /* ── Question ── */
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(17px, 4vw, 21px);
+    line-height: 1.45;
+    margin-bottom: 8px;
+  }
+
+  .clue {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .clue::before {
+    content: '💡';
+    font-size: 14px;
+  }
+
+  /* ── Answers ── */
+  .answers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .answer-btn {
+    display: block;
+    width: 100%;
+    padding: 15px 18px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    line-height: 1.3;
+  }
+
+  .answer-btn:hover:not(:disabled) {
+    background: rgba(10,124,92,0.06);
+    border-color: rgba(10,124,92,0.3);
+    transform: translateX(3px);
+  }
+
+  .answer-btn:disabled { cursor: default; }
+
+  .answer-btn.correct {
+    background: rgba(10,124,92,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .answer-btn.wrong {
+    background: rgba(220,38,38,0.08);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  /* ── Feedback ── */
+  .feedback {
+    margin-top: 20px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    font-size: 15px;
+    line-height: 1.5;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .feedback.correct-fb {
+    background: rgba(10,124,92,0.06);
+    border: 1px solid rgba(10,124,92,0.2);
+  }
+
+  .feedback.wrong-fb {
+    background: rgba(220,38,38,0.05);
+    border: 1px solid rgba(220,38,38,0.18);
+  }
+
+  .feedback-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .correct-fb .feedback-title { color: var(--accent); }
+  .wrong-fb   .feedback-title { color: var(--danger); }
+
+  .feedback p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  /* ── Next Button ── */
+  .next-btn {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+
+  .next-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .next-btn:active { transform: translateY(0); }
+
+  /* ── Results ── */
+  #resultCard { display: none; }
+
+  .score-hero {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .score-ring {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) 0%, transparent 0%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    position: relative;
+    transition: background 1s ease;
+  }
+
+  .score-ring::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: var(--surface);
+  }
+
+  .score-number {
+    position: relative;
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    z-index: 1;
+  }
+
+  .score-label {
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .score-label strong { color: var(--text); }
+
+  /* ── Review ── */
+  .review-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .review-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .review-item.r-correct { border-color: rgba(10,124,92,0.25); }
+  .review-item.r-wrong   { border-color: rgba(220,38,38,0.2); }
+
+  .review-q {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  .review-ans {
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    margin-top: 5px;
+  }
+
+  .review-ans.ra-correct { background: rgba(10,124,92,0.08); color: var(--accent); }
+  .review-ans.ra-wrong   { background: rgba(220,38,38,0.07); color: var(--danger); }
+
+  .retry-btn {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    background: transparent;
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .retry-btn:hover { background: rgba(110,231,183,0.08); }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="tag" id="headerTag">Quiz</div>
+    <h1 id="headerTitle">Load a Quiz</h1>
+    <p id="headerDesc">Upload a JSON file to get started</p>
+  </div>
+
+  <!-- Upload Card -->
+  <div class="card" id="uploadCard">
+    <label id="uploadLabel" for="fileInput">
+      <div class="upload-icon">📂</div>
+      <div class="upload-title">Choose your quiz file</div>
+      <div class="upload-sub">Tap to browse for a .json file</div>
+      <input type="file" id="fileInput" accept=".json,application/json">
+    </label>
+    <div id="uploadError"></div>
+  </div>
+
+  <!-- Quiz Card -->
+  <div class="card" id="quizCard" style="display:none">
+    <div class="progress-row">
+      <span class="progress-label" id="progressLabel"></span>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="difficulty-badge" id="diffBadge"></span>
+    </div>
+
+    <div class="question-text" id="questionText"></div>
+    <div class="clue" id="clueText"></div>
+    <div class="answers" id="answersContainer"></div>
+    <div id="feedbackArea"></div>
+  </div>
+
+  <!-- Result Card -->
+  <div class="card" id="resultCard" style="display:none">
+    <div class="score-hero">
+      <div class="score-ring" id="scoreRing">
+        <span class="score-number" id="scoreNumber">0%</span>
+      </div>
+      <div class="score-label" id="scoreLabel"></div>
+    </div>
+    <div class="review-list" id="reviewList"></div>
+    <button class="retry-btn" onclick="initQuiz()">&#8635; Try Again</button>
+    <button class="retry-btn" style="margin-top:10px" onclick="loadNew()">&#128194; Load New Quiz</button>
+  </div>
+
+</div>
+
+<script>
+var QUIZ_DATA = null;
+var questions, qIndex, userAnswers, locked;
+
+/* ── Upload styles injected via JS to keep HTML clean ── */
+(function() {
+  var s = document.createElement('style');
+  s.textContent = [
+    '#uploadLabel {',
+    '  display:flex; flex-direction:column; align-items:center; justify-content:center;',
+    '  padding:48px 24px; border:2px dashed rgba(10,124,92,0.25);',
+    '  border-radius:14px; cursor:pointer; text-align:center;',
+    '  transition:border-color 0.2s, background 0.2s;',
+    '}',
+    '#uploadLabel:hover { border-color:var(--accent); background:rgba(10,124,92,0.04); }',
+    '.upload-icon { font-size:48px; margin-bottom:16px; }',
+    '.upload-title { font-family:"Playfair Display",serif; font-size:20px; margin-bottom:6px; }',
+    '.upload-sub { font-size:14px; color:var(--muted); }',
+    '#fileInput { display:none; }',
+    '#uploadError { margin-top:14px; color:var(--danger); font-size:14px; text-align:center; min-height:20px; }'
+  ].join('');
+  document.head.appendChild(s);
+})();
+
+/* ── File input handler ── */
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var data = JSON.parse(ev.target.result);
+      if (!data.questions || !Array.isArray(data.questions) || data.questions.length === 0) {
+        throw new Error('No questions found in file.');
+      }
+      QUIZ_DATA = data;
+      document.getElementById('uploadError').textContent = '';
+      document.getElementById('uploadCard').style.display = 'none';
+      initQuiz();
+    } catch(err) {
+      document.getElementById('uploadError').textContent = 'Invalid file: ' + err.message;
+    }
+  };
+  reader.readAsText(file);
+});
+
+function loadNew() {
+  QUIZ_DATA = null;
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('uploadCard').style.display = 'block';
+  document.getElementById('headerTag').textContent = 'Quiz';
+  document.getElementById('headerTitle').textContent = 'Load a Quiz';
+  document.getElementById('headerDesc').textContent = 'Upload a JSON file to get started';
+  document.getElementById('fileInput').value = '';
+}
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function initQuiz() {
+  var total = Math.min(10, QUIZ_DATA.questions.length);
+  questions = shuffle(QUIZ_DATA.questions).slice(0, total);
+  qIndex = 0;
+  userAnswers = [];
+  locked = false;
+
+  document.getElementById('headerTag').textContent = QUIZ_DATA.name || 'Quiz';
+  document.getElementById('headerTitle').textContent = (QUIZ_DATA.name || 'Quiz') + ' Quiz';
+  document.getElementById('headerDesc').textContent = QUIZ_DATA.description || '';
+  document.getElementById('diffBadge').textContent = QUIZ_DATA.difficulty || '';
+
+  document.getElementById('quizCard').style.display = 'block';
+  document.getElementById('resultCard').style.display = 'none';
+
+  showQuestion();
+}
+
+function showQuestion() {
+  locked = false;
+  var q = questions[qIndex];
+  var total = questions.length;
+
+  document.getElementById('progressLabel').textContent = (qIndex + 1) + '/' + total;
+  document.getElementById('progressFill').style.width = ((qIndex + 1) / total * 100) + '%';
+  document.getElementById('questionText').textContent = q.question;
+  document.getElementById('clueText').textContent = q.clue || '';
+  document.getElementById('feedbackArea').innerHTML = '';
+
+  var options = shuffle([q.correctAnswer].concat(q.incorrectAnswers));
+  var container = document.getElementById('answersContainer');
+  container.innerHTML = '';
+
+  options.forEach(function(opt) {
+    var btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = opt;
+    btn.type = 'button';
+    btn.addEventListener('click', function() { selectAnswer(opt, btn); });
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(answer, btn) {
+  if (locked) return;
+  locked = true;
+
+  var q = questions[qIndex];
+  var isCorrect = answer === q.correctAnswer;
+  userAnswers.push({ answer: answer, correct: isCorrect, q: q });
+
+  var allBtns = document.querySelectorAll('.answer-btn');
+  allBtns.forEach(function(b) {
+    b.disabled = true;
+    if (b.textContent === q.correctAnswer) {
+      b.textContent = '\u2713  ' + b.textContent;
+      b.classList.add('correct');
+    } else if (b === btn && !isCorrect) {
+      b.textContent = '\u2717  ' + b.textContent;
+      b.classList.add('wrong');
+    }
+  });
+
+  var fb = document.createElement('div');
+  fb.className = 'feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+
+  var title = document.createElement('div');
+  title.className = 'feedback-title';
+  title.textContent = isCorrect ? '\u2713 Correct!' : '\u2717 Incorrect';
+  fb.appendChild(title);
+
+  if (!isCorrect) {
+    var p1 = document.createElement('p');
+    p1.textContent = 'Your answer: ' + answer;
+    fb.appendChild(p1);
+    var p2 = document.createElement('p');
+    p2.textContent = 'Correct answer: ' + q.correctAnswer;
+    fb.appendChild(p2);
+  }
+
+  if (q.explanation) {
+    var ex = document.createElement('p');
+    ex.textContent = q.explanation;
+    fb.appendChild(ex);
+  }
+
+  var nextBtn = document.createElement('button');
+  nextBtn.className = 'next-btn';
+  nextBtn.type = 'button';
+  nextBtn.style.color = '#ffffff';
+  nextBtn.textContent = (qIndex === questions.length - 1) ? 'See Results \u2192' : 'Next Question \u2192';
+  nextBtn.addEventListener('click', nextQuestion);
+  fb.appendChild(nextBtn);
+
+  document.getElementById('feedbackArea').appendChild(fb);
+}
+
+function nextQuestion() {
+  qIndex++;
+  if (qIndex < questions.length) {
+    showQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.getElementById('quizCard').style.display = 'none';
+  document.getElementById('resultCard').style.display = 'block';
+
+  var correct = userAnswers.filter(function(a) { return a.correct; }).length;
+  var pct = Math.round(correct / questions.length * 100);
+
+  document.getElementById('scoreNumber').textContent = pct + '%';
+  document.getElementById('scoreLabel').innerHTML =
+    'You got <strong>' + correct + '</strong> of <strong>' + questions.length + '</strong> correct';
+
+  setTimeout(function() {
+    document.getElementById('scoreRing').style.background =
+      'conic-gradient(#0a7c5c ' + pct + '%, rgba(0,0,0,0.07) 0%)';
+  }, 100);
+
+  var list = document.getElementById('reviewList');
+  list.innerHTML = '';
+
+  userAnswers.forEach(function(ua, i) {
+    var item = document.createElement('div');
+    item.className = 'review-item ' + (ua.correct ? 'r-correct' : 'r-wrong');
+
+    var qEl = document.createElement('div');
+    qEl.className = 'review-q';
+    qEl.textContent = (i + 1) + '. ' + ua.q.question;
+    item.appendChild(qEl);
+
+    if (!ua.correct) {
+      var wa = document.createElement('div');
+      wa.className = 'review-ans ra-wrong';
+      wa.textContent = '\u2717 ' + ua.answer;
+      item.appendChild(wa);
+    }
+
+    var ca = document.createElement('div');
+    ca.className = 'review-ans ra-correct';
+    ca.textContent = '\u2713 ' + ua.q.correctAnswer;
+    item.appendChild(ca);
+
+    list.appendChild(item);
+  });
+}
+</script>
+</body>
 </html>
