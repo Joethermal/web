@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Biology Quiz</title>
+<title>Quiz</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap');
 
@@ -85,6 +85,52 @@
     box-shadow: 0 4px 24px rgba(0,0,0,0.06);
   }
 
+  /* ── Import Card ── */
+  .import-inner {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .import-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .import-inner h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+
+  .import-inner p {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 28px;
+  }
+
+  .import-label {
+    display: inline-block;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #ffffff;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.01em;
+  }
+
+  .import-label:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .import-error {
+    color: var(--danger);
+    font-size: 14px;
+    margin-top: 16px;
+    min-height: 20px;
+  }
+
   /* ── Progress ── */
   .progress-row {
     display: flex;
@@ -135,21 +181,16 @@
     font-family: 'Playfair Display', serif;
     font-size: clamp(17px, 4vw, 21px);
     line-height: 1.45;
-    margin-bottom: 8px;
+    margin-bottom: 20px;
   }
 
-  .clue {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 22px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .clue::before {
-    content: '💡';
-    font-size: 14px;
+  .question-image {
+    width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: block;
   }
 
   /* ── Answers ── */
@@ -325,8 +366,7 @@
   .retry-btn {
     display: block;
     width: 100%;
-    margin-top: 10px;
-    margin-bottom: 20px;
+    margin-top: 20px;
     padding: 15px;
     background: transparent;
     color: var(--accent);
@@ -341,6 +381,24 @@
 
   .retry-btn:hover { background: rgba(110,231,183,0.08); }
 
+  .load-new-btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 15px;
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .load-new-btn:hover { background: var(--surface2); border-color: var(--muted); }
+
   /* ── Animations ── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(14px); }
@@ -352,36 +410,24 @@
 
 <div class="wrap">
 
-  <div class="header">
-    <!--<div class="tag" id="headerTag">Quiz</div>-->
-    <h1 id="headerTitle">Load a Quiz</h1>
-    <p id="headerDesc">Upload a JSON file to get started</p>
+  <div class="header" id="mainHeader" style="display:none">
+    <div class="tag" id="headerTag"></div>
+    <h1 id="headerTitle"></h1>
+    <p id="headerDesc"></p>
   </div>
 
-  <!-- Upload Card -->
-  <div class="card" id="uploadCard">
-    <label id="uploadLabel" for="fileInput">
-      <div class="upload-icon">📂</div>
-      <div class="upload-title">Choose your quiz file</div>
-      <div class="upload-sub">Tap to browse for a .json file</div>
-      <input type="file" id="fileInput" accept=".json,application/json">
-    </label>
-    <div id="uploadError"></div>
-
-
-<div class="card" style="border:2px solid #007aff; text-align:center; padding:20px; border-radius:14px; margin-bottom:20px; background:#f0f8ff;">
-  <h2 style="margin-top:0; margin-bottom:10px; color:#007aff;">Create & Share Unlimited Quizzes!</h2>
-  <p style="font-size:16px; color:#333; margin-bottom:15px;">
-    Build, take, and share quizzes on the go. Track your progress and challenge your friends!
-  </p>
-  <a href="https://apps.apple.com/app/id6760447357" target="_blank" style="display:inline-block; background:#007aff; color:white; padding:12px 18px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:16px;">
-    Get the iOS App
-  </a>
-</div>
-
-
-
-    
+  <!-- Import Card -->
+  <div class="card" id="importCard">
+    <div class="import-inner">
+      <div class="import-icon">📂</div>
+      <h2>Load a Quiz</h2>
+      <p>Import a .json or .zip file</p>
+      <label class="import-label">
+        <input type="file" id="fileInput" accept=".json,.zip" style="display:none">
+        Choose File
+      </label>
+      <div class="import-error" id="importError"></div>
+    </div>
   </div>
 
   <!-- Quiz Card -->
@@ -395,13 +441,13 @@
     </div>
 
     <div class="question-text" id="questionText"></div>
-    <!--<div class="clue" id="clueText"></div>-->
+    <img class="question-image" id="questionImage" src="" alt="" style="display:none">
     <div class="answers" id="answersContainer"></div>
     <div id="feedbackArea"></div>
   </div>
 
   <!-- Result Card -->
-  <div class="card" id="resultCard" style="display:none">
+  <div class="card" id="resultCard">
     <div class="score-hero">
       <div class="score-ring" id="scoreRing">
         <span class="score-number" id="scoreNumber">0%</span>
@@ -409,82 +455,128 @@
       <div class="score-label" id="scoreLabel"></div>
     </div>
     <div class="review-list" id="reviewList"></div>
-    <button class="retry-btn" onclick="initQuiz()">&#8635; Try Again</button>
-    <button class="retry-btn" style="margin-top:10px" onclick="loadNew()">&#128194; Load New Quiz</button>
-
-    <div class="card" style="border:2px solid #007aff; text-align:center; padding:20px; border-radius:14px; margin-bottom:20px; background:#f0f8ff;">
-  <h2 style="margin-top:0; margin-bottom:10px; color:#007aff;">Create & Share Unlimited Quizzes!</h2>
-  <p style="font-size:16px; color:#333; margin-bottom:15px;">
-    Build, take, and share quizzes on the go. Track your progress and challenge your friends!
-  </p>
-  <a href="https://apps.apple.com/app/id6760447357" target="_blank" style="display:inline-block; background:#007aff; color:white; padding:12px 18px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:16px;">
-    Get the iOS App
-  </a>
-</div>
+    <button class="retry-btn" onclick="initQuiz()">↺ Try Again</button>
+    <button class="load-new-btn" onclick="showImport()">Load New Quiz</button>
   </div>
 
-
-
-
-  
-
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 var QUIZ_DATA = null;
+var imageMap = {};
+var blobUrls = [];
+
 var questions, qIndex, userAnswers, locked;
 
-/* ── Upload styles injected via JS to keep HTML clean ── */
-(function() {
-  var s = document.createElement('style');
-  s.textContent = [
-    '#uploadLabel {',
-    '  display:flex; flex-direction:column; align-items:center; justify-content:center;',
-    '  padding:48px 24px; border:2px dashed rgba(10,124,92,0.25);',
-    '  border-radius:14px; cursor:pointer; text-align:center;',
-    '  transition:border-color 0.2s, background 0.2s;',
-    '}',
-    '#uploadLabel:hover { border-color:var(--accent); background:rgba(10,124,92,0.04); }',
-    '.upload-icon { font-size:48px; margin-bottom:16px; }',
-    '.upload-title { font-family:"Playfair Display",serif; font-size:20px; margin-bottom:6px; }',
-    '.upload-sub { font-size:14px; color:var(--muted); }',
-    '#fileInput { display:none; }',
-    '#uploadError { margin-top:14px; color:var(--danger); font-size:14px; text-align:center; min-height:20px; }'
-  ].join('');
-  document.head.appendChild(s);
-})();
+// ── File loading ──────────────────────────────────────────────
 
-/* ── File input handler ── */
 document.getElementById('fileInput').addEventListener('change', function(e) {
   var file = e.target.files[0];
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(ev) {
-    try {
-      var data = JSON.parse(ev.target.result);
-      if (!data.questions || !Array.isArray(data.questions) || data.questions.length === 0) {
-        throw new Error('No questions found in file.');
-      }
-      QUIZ_DATA = data;
-      document.getElementById('uploadError').textContent = '';
-      document.getElementById('uploadCard').style.display = 'none';
-      initQuiz();
-    } catch(err) {
-      document.getElementById('uploadError').textContent = 'Invalid file: ' + err.message;
-    }
-  };
-  reader.readAsText(file);
+  if (file) loadFile(file);
+  // reset so same file can be re-selected
+  e.target.value = '';
 });
 
-function loadNew() {
-  QUIZ_DATA = null;
-  document.getElementById('resultCard').style.display = 'none';
-  document.getElementById('uploadCard').style.display = 'block';
-  //document.getElementById('headerTag').textContent = 'Quiz';
-  document.getElementById('headerTitle').textContent = 'Load a Quiz';
-  document.getElementById('headerDesc').textContent = 'Upload a JSON file to get started';
-  document.getElementById('fileInput').value = '';
+function loadFile(file) {
+  var errorEl = document.getElementById('importError');
+  errorEl.textContent = '';
+
+  if (file.name.endsWith('.json')) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        revokeBlobs();
+        imageMap = {};
+        QUIZ_DATA = data;
+        startFromImport();
+      } catch (err) {
+        errorEl.textContent = 'Could not parse JSON file.';
+      }
+    };
+    reader.readAsText(file);
+
+  } else if (file.name.endsWith('.zip')) {
+    JSZip.loadAsync(file).then(function(zip) {
+      // Find the first .json file in the zip
+      var jsonEntry = null;
+      zip.forEach(function(path, entry) {
+        if (!entry.dir && path.split('/').pop().endsWith('.json') && !jsonEntry) {
+          jsonEntry = entry;
+        }
+      });
+      if (!jsonEntry) {
+        errorEl.textContent = 'No JSON file found in zip.';
+        return;
+      }
+
+      jsonEntry.async('string').then(function(jsonStr) {
+        var data;
+        try {
+          data = JSON.parse(jsonStr);
+        } catch (err) {
+          errorEl.textContent = 'Could not parse JSON inside zip.';
+          return;
+        }
+
+        // Collect all image names referenced in questions
+        var needed = [];
+        (data.questions || []).forEach(function(q) {
+          if (q.imageName) needed.push(q.imageName);
+        });
+
+        revokeBlobs();
+        imageMap = {};
+
+        var promises = needed.map(function(name) {
+          var entry = null;
+          zip.forEach(function(path, e) {
+            if (!e.dir && path.split('/').pop() === name && !entry) {
+              entry = e;
+            }
+          });
+          if (!entry) return Promise.resolve();
+          return entry.async('blob').then(function(blob) {
+            var url = URL.createObjectURL(blob);
+            blobUrls.push(url);
+            imageMap[name] = url;
+          });
+        });
+
+        Promise.all(promises).then(function() {
+          QUIZ_DATA = data;
+          startFromImport();
+        });
+      });
+    }).catch(function() {
+      errorEl.textContent = 'Could not read zip file.';
+    });
+
+  } else {
+    errorEl.textContent = 'Please choose a .json or .zip file.';
+  }
 }
+
+function revokeBlobs() {
+  blobUrls.forEach(function(u) { URL.revokeObjectURL(u); });
+  blobUrls = [];
+}
+
+function startFromImport() {
+  document.getElementById('importCard').style.display = 'none';
+  document.getElementById('mainHeader').style.display = 'block';
+  initQuiz();
+}
+
+function showImport() {
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('quizCard').style.display = 'none';
+  document.getElementById('mainHeader').style.display = 'none';
+  document.getElementById('importCard').style.display = 'block';
+}
+
+// ── Quiz logic ────────────────────────────────────────────────
 
 function shuffle(arr) {
   var a = arr.slice();
@@ -496,14 +588,13 @@ function shuffle(arr) {
 }
 
 function initQuiz() {
-  var total = Math.min(10, QUIZ_DATA.questions.length);
-  questions = shuffle(QUIZ_DATA.questions).slice(0, total);
+  questions = shuffle(QUIZ_DATA.questions).slice(0, 10);
   qIndex = 0;
   userAnswers = [];
   locked = false;
 
-  //document.getElementById('headerTag').textContent = QUIZ_DATA.name || 'Quiz';
-  document.getElementById('headerTitle').textContent = (QUIZ_DATA.name || 'Quiz');
+  document.getElementById('headerTag').textContent = QUIZ_DATA.name || '';
+  document.getElementById('headerTitle').textContent = (QUIZ_DATA.name || 'Quiz') + ' Quiz';
   document.getElementById('headerDesc').textContent = QUIZ_DATA.description || '';
   document.getElementById('diffBadge').textContent = QUIZ_DATA.difficulty || '';
 
@@ -521,8 +612,17 @@ function showQuestion() {
   document.getElementById('progressLabel').textContent = (qIndex + 1) + '/' + total;
   document.getElementById('progressFill').style.width = ((qIndex + 1) / total * 100) + '%';
   document.getElementById('questionText').textContent = q.question;
-  //document.getElementById('clueText').textContent = q.clue || '';
   document.getElementById('feedbackArea').innerHTML = '';
+
+  var imgEl = document.getElementById('questionImage');
+  if (q.imageName && imageMap[q.imageName]) {
+    imgEl.src = imageMap[q.imageName];
+    imgEl.alt = q.imageName;
+    imgEl.style.display = 'block';
+  } else {
+    imgEl.style.display = 'none';
+    imgEl.src = '';
+  }
 
   var options = shuffle([q.correctAnswer].concat(q.incorrectAnswers));
   var container = document.getElementById('answersContainer');
@@ -550,10 +650,10 @@ function selectAnswer(answer, btn) {
   allBtns.forEach(function(b) {
     b.disabled = true;
     if (b.textContent === q.correctAnswer) {
-      b.textContent = '\u2713  ' + b.textContent;
+      b.textContent = '✓  ' + b.textContent;
       b.classList.add('correct');
     } else if (b === btn && !isCorrect) {
-      b.textContent = '\u2717  ' + b.textContent;
+      b.textContent = '✗  ' + b.textContent;
       b.classList.add('wrong');
     }
   });
@@ -563,7 +663,7 @@ function selectAnswer(answer, btn) {
 
   var title = document.createElement('div');
   title.className = 'feedback-title';
-  title.textContent = isCorrect ? '\u2713 Correct!' : '\u2717 Incorrect';
+  title.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
   fb.appendChild(title);
 
   if (!isCorrect) {
@@ -575,17 +675,11 @@ function selectAnswer(answer, btn) {
     fb.appendChild(p2);
   }
 
-  //if (q.explanation) {
-    //var ex = document.createElement('p');
-    //ex.textContent = q.explanation;
-    //fb.appendChild(ex);
-  //}
-
   var nextBtn = document.createElement('button');
   nextBtn.className = 'next-btn';
   nextBtn.type = 'button';
   nextBtn.style.color = '#ffffff';
-  nextBtn.textContent = (qIndex === questions.length - 1) ? 'See Results \u2192' : 'Next Question \u2192';
+  nextBtn.textContent = (qIndex === questions.length - 1) ? 'See Results →' : 'Next Question →';
   nextBtn.addEventListener('click', nextQuestion);
   fb.appendChild(nextBtn);
 
@@ -632,13 +726,13 @@ function showResults() {
     if (!ua.correct) {
       var wa = document.createElement('div');
       wa.className = 'review-ans ra-wrong';
-      wa.textContent = '\u2717 ' + ua.answer;
+      wa.textContent = '✗ ' + ua.answer;
       item.appendChild(wa);
     }
 
     var ca = document.createElement('div');
     ca.className = 'review-ans ra-correct';
-    ca.textContent = '\u2713 ' + ua.q.correctAnswer;
+    ca.textContent = '✓ ' + ua.q.correctAnswer;
     item.appendChild(ca);
 
     list.appendChild(item);
