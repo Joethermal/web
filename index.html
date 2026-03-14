@@ -363,6 +363,15 @@
   .review-ans.ra-correct { background: rgba(10,124,92,0.08); color: var(--accent); }
   .review-ans.ra-wrong   { background: rgba(220,38,38,0.07); color: var(--danger); }
 
+  .review-image {
+    width: 100%;
+    max-height: 160px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin: 8px 0 10px;
+    display: block;
+  }
+
   .retry-btn {
     display: block;
     width: 100%;
@@ -723,6 +732,14 @@ function showResults() {
     qEl.className = 'review-q';
     qEl.textContent = (i + 1) + '. ' + ua.q.question;
     item.appendChild(qEl);
+
+    if (ua.q.imageName && imageMap[ua.q.imageName]) {
+      var img = document.createElement('img');
+      img.className = 'review-image';
+      img.src = imageMap[ua.q.imageName];
+      img.alt = ua.q.imageName;
+      item.appendChild(img);
+    }
 
     if (!ua.correct) {
       var wa = document.createElement('div');
