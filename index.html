@@ -531,8 +531,9 @@ function loadFile(file) {
 
         var promises = needed.map(function(name) {
           var entry = null;
+          var baseName = name.split('/').pop();
           zip.forEach(function(path, e) {
-            if (!e.dir && path.split('/').pop() === name && !entry) {
+            if (!e.dir && !entry && (path === name || path.split('/').pop() === baseName)) {
               entry = e;
             }
           });
